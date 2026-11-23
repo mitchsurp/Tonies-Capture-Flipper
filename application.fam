@@ -1,11 +1,19 @@
 App(
-    appid="tonies_capture",
-    name="Tonies Capture",
+    appid="tommybox_capture",
+    name="TommyBox Capture",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="tonies_capture_app",
+    requires=[
+        "gui",
+        "nfc",
+        "storage",
+        "notification",
+    ],
     stack_size=4 * 1024,
     fap_category="NFC",
     fap_version="1.0",
-    fap_description="Batch capture & verify Tonies SLIX-L NFC figures with TommyBox unlock",
+    fap_icon="tonies_capture.png",
+    fap_description="Batch capture & verify SLIX-L NFC figures with TommyBox unlock",
     fap_author="mitchsurp",
+    fap_weburl="https://github.com/mitchsurp/Tonies-Capture-Flipper",
 )

@@ -116,10 +116,7 @@ static const NotificationSequence sequence_partial_read = {
  *  2. Block 7 (bytes 28..31, the final block read sequentially) is not all zeros
  *  3. No 5 consecutive 0x00 bytes anywhere in Data Content (matches validate_files.sh)
  */
-static bool tonies_verify_blocks(
-    const uint8_t* data,
-    size_t data_len,
-    uint8_t* out_valid_blocks) {
+static bool tonies_verify_blocks(const uint8_t* data, size_t data_len, uint8_t* out_valid_blocks) {
     if(!data || data_len < TONIE_DATA_SIZE) {
         if(out_valid_blocks) *out_valid_blocks = 0;
         return false;
@@ -162,10 +159,8 @@ static bool tonies_verify_blocks(
  * Verify a saved .nfc file on the SD card by reading it back via FlipperFormat
  * and checking all required Tonie SLIX-L fields.
  */
-static bool tonies_verify_saved_file(
-    Storage* storage,
-    const char* file_path,
-    FuriString* out_reason) {
+static bool
+    tonies_verify_saved_file(Storage* storage, const char* file_path, FuriString* out_reason) {
     FlipperFormat* ff = flipper_format_file_alloc(storage);
     FuriString* temp_str = furi_string_alloc();
     bool valid = false;
@@ -229,8 +224,8 @@ static bool tonies_verify_saved_file(
             break;
         }
 
-        if(pwd_privacy[0] != 0x7F || pwd_privacy[1] != 0xFD ||
-           pwd_privacy[2] != 0x6E || pwd_privacy[3] != 0x5B) {
+        if(pwd_privacy[0] != 0x7F || pwd_privacy[1] != 0xFD || pwd_privacy[2] != 0x6E ||
+           pwd_privacy[3] != 0x5B) {
             if(out_reason) {
                 furi_string_printf(
                     out_reason,
@@ -257,10 +252,7 @@ static bool tonies_verify_saved_file(
     return valid;
 }
 
-static void tonies_capture_button_callback(
-    GuiButtonType result,
-    InputType type,
-    void* context) {
+static void tonies_capture_button_callback(GuiButtonType result, InputType type, void* context) {
     ToniesCaptureApp* app = context;
     if(type == InputTypeShort && result == GuiButtonTypeRight && app->has_last_capture) {
         view_dispatcher_send_custom_event(app->view_dispatcher, ToniesEventBtnRename);
@@ -276,23 +268,14 @@ static void tonies_show_waiting_ui(ToniesCaptureApp* app) {
         app->widget_capture, 64, 31, AlignCenter, AlignTop, FontSecondary, "0 / 8");
 }
 
-static void tonies_show_progress_ui(
-    ToniesCaptureApp* app,
-    uint8_t blocks,
-    uint32_t attempt) {
+static void tonies_show_progress_ui(ToniesCaptureApp* app, uint8_t blocks, uint32_t attempt) {
     widget_reset(app->widget_capture);
     widget_add_rect_element(app->widget_capture, 4, 6, 120, 42, 4, false);
 
     FuriString* hdr = furi_string_alloc();
     furi_string_printf(hdr, "Scanning: %u / 8", blocks);
     widget_add_string_element(
-        app->widget_capture,
-        64,
-        16,
-        AlignCenter,
-        AlignTop,
-        FontPrimary,
-        furi_string_get_cstr(hdr));
+        app->widget_capture, 64, 16, AlignCenter, AlignTop, FontPrimary, furi_string_get_cstr(hdr));
     furi_string_free(hdr);
 
     if(attempt > 0) {
@@ -321,8 +304,7 @@ static void tonies_show_saved_ui(ToniesCaptureApp* app) {
         app->widget_capture, 64, 9, AlignCenter, AlignTop, FontPrimary, "SAVED!   8 / 8");
 
     FuriString* scan_line = furi_string_alloc();
-    furi_string_printf(
-        scan_line, "Scan #%lu", (unsigned long)app->current_tonie_scans);
+    furi_string_printf(scan_line, "Scan #%lu", (unsigned long)app->current_tonie_scans);
     widget_add_string_element(
         app->widget_capture,
         64,
@@ -346,11 +328,7 @@ static void tonies_show_saved_ui(ToniesCaptureApp* app) {
     furi_string_free(fname);
 
     widget_add_button_element(
-        app->widget_capture,
-        GuiButtonTypeRight,
-        "Rename",
-        tonies_capture_button_callback,
-        app);
+        app->widget_capture, GuiButtonTypeRight, "Rename", tonies_capture_button_callback, app);
 }
 
 static NfcCommand tonies_poller_callback(NfcGenericEvent event, void* context) {
@@ -429,8 +407,8 @@ static NfcCommand tonies_poller_callback(NfcGenericEvent event, void* context) {
 
         // All 8 blocks are verified non-zero and complete!
         furi_mutex_acquire(app->mutex, FuriWaitForever);
-        bool is_duplicate =
-            app->has_last_capture && (memcmp(app->last_uid, uid, TONIE_UID_SIZE) == 0);
+        bool is_duplicate = app->has_last_capture &&
+                            (memcmp(app->last_uid, uid, TONIE_UID_SIZE) == 0);
         if(!is_duplicate) {
             slix_copy(app->candidate_slix, slix_data);
             app->candidate_slix->passwords[SlixPasswordTypePrivacy] = TONIE_PRIVACY_PASSWORD;
@@ -514,8 +492,7 @@ static bool tonies_find_existing_uid_on_sd(
             flipper_format_free(ff);
 
             if(uid_read && memcmp(file_uid, target_uid, TONIE_UID_SIZE) == 0) {
-                if(tonies_verify_saved_file(
-                       app->storage, furi_string_get_cstr(full_path), NULL)) {
+                if(tonies_verify_saved_file(app->storage, furi_string_get_cstr(full_path), NULL)) {
                     if(out_existing_name) {
                         furi_string_set_strn(out_existing_name, name_buf, len - 4);
                     }
@@ -555,8 +532,7 @@ static void tonies_handle_complete_read(ToniesCaptureApp* app) {
 
     storage_simply_mkdir(app->storage, NFC_FOLDER);
 
-    if(tonies_find_existing_uid_on_sd(
-           app, uid, app->last_file_name, app->last_file_path)) {
+    if(tonies_find_existing_uid_on_sd(app, uid, app->last_file_name, app->last_file_path)) {
         // Already exists and verified on SD card!
         furi_mutex_acquire(app->mutex, FuriWaitForever);
         memcpy(app->last_uid, uid, TONIE_UID_SIZE);
@@ -571,17 +547,9 @@ static void tonies_handle_complete_read(ToniesCaptureApp* app) {
     }
 
     furi_string_printf(
-        app->last_file_name,
-        "Tonie_%02X%02X%02X%02X",
-        uid[4],
-        uid[5],
-        uid[6],
-        uid[7]);
+        app->last_file_name, "Tonie_%02X%02X%02X%02X", uid[4], uid[5], uid[6], uid[7]);
     furi_string_printf(
-        app->last_file_path,
-        "%s/%s.nfc",
-        NFC_FOLDER,
-        furi_string_get_cstr(app->last_file_name));
+        app->last_file_path, "%s/%s.nfc", NFC_FOLDER, furi_string_get_cstr(app->last_file_name));
 
     nfc_device_set_data(app->nfc_device, NfcProtocolSlix, app->working_slix_data);
     bool saved = nfc_device_save(app->nfc_device, furi_string_get_cstr(app->last_file_path));
@@ -660,16 +628,12 @@ static void tonies_run_sd_audit(ToniesCaptureApp* app) {
             total_nfc++;
             furi_string_printf(full_path, "%s/%s", NFC_FOLDER, name_buf);
 
-            if(tonies_verify_saved_file(
-                   app->storage, furi_string_get_cstr(full_path), reason)) {
+            if(tonies_verify_saved_file(app->storage, furi_string_get_cstr(full_path), reason)) {
                 valid_count++;
             } else {
                 broken_count++;
                 furi_string_cat_printf(
-                    app->audit_text,
-                    "[BAD] %s\n  -> %s\n",
-                    name_buf,
-                    furi_string_get_cstr(reason));
+                    app->audit_text, "[BAD] %s\n  -> %s\n", name_buf, furi_string_get_cstr(reason));
             }
         }
     }
@@ -683,8 +647,8 @@ static void tonies_run_sd_audit(ToniesCaptureApp* app) {
         (unsigned long)total_nfc,
         (unsigned long)valid_count,
         (unsigned long)broken_count,
-        broken_count == 0 ? "All SLIX Tonie files in /ext/nfc are complete!"
-                          : furi_string_get_cstr(app->audit_text));
+        broken_count == 0 ? "All SLIX Tonie files in /ext/nfc are complete!" :
+                            furi_string_get_cstr(app->audit_text));
 
     furi_string_move(app->audit_text, summary);
     furi_string_free(full_path);
@@ -717,9 +681,8 @@ static bool tonies_custom_event_callback(void* context, uint32_t event) {
     } else if(event == ToniesEventScanningProgress) {
         furi_mutex_acquire(app->mutex, FuriWaitForever);
         uint8_t blocks = app->partial_blocks_read;
-        bool same_as_last =
-            app->has_last_capture &&
-            (memcmp(app->last_uid, app->partial_uid, TONIE_UID_SIZE) == 0);
+        bool same_as_last = app->has_last_capture &&
+                            (memcmp(app->last_uid, app->partial_uid, TONIE_UID_SIZE) == 0);
         furi_mutex_release(app->mutex);
 
         if(!same_as_last) {
@@ -756,21 +719,13 @@ static bool tonies_custom_event_callback(void* context, uint32_t event) {
     } else if(event == ToniesEventBtnRename) {
         tonies_stop_poller(app);
         app->current_view = ToniesViewRename;
-        strncpy(
-            app->rename_buffer,
-            furi_string_get_cstr(app->last_file_name),
-            MAX_NAME_LEN - 1);
+        strncpy(app->rename_buffer, furi_string_get_cstr(app->last_file_name), MAX_NAME_LEN - 1);
         app->rename_buffer[MAX_NAME_LEN - 1] = '\0';
 
         text_input_reset(app->text_input);
         text_input_set_header_text(app->text_input, "Name Tonie (.nfc):");
         text_input_set_result_callback(
-            app->text_input,
-            tonies_rename_callback,
-            app,
-            app->rename_buffer,
-            MAX_NAME_LEN,
-            true);
+            app->text_input, tonies_rename_callback, app, app->rename_buffer, MAX_NAME_LEN, true);
         view_dispatcher_switch_to_view(app->view_dispatcher, ToniesViewRename);
         return true;
     } else if(event == ToniesEventRenameDone) {
@@ -808,8 +763,7 @@ static bool tonies_navigation_callback(void* context) {
         view_dispatcher_switch_to_view(app->view_dispatcher, ToniesViewCapture);
         tonies_start_poller(app);
         return true;
-    } else if(
-        app->current_view == ToniesViewCapture || app->current_view == ToniesViewAudit) {
+    } else if(app->current_view == ToniesViewCapture || app->current_view == ToniesViewAudit) {
         tonies_stop_poller(app);
         app->current_view = ToniesViewMenu;
         view_dispatcher_switch_to_view(app->view_dispatcher, ToniesViewMenu);
@@ -840,21 +794,16 @@ int32_t tonies_capture_app(void* p) {
 
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
-    view_dispatcher_set_custom_event_callback(
-        app->view_dispatcher, tonies_custom_event_callback);
+    view_dispatcher_set_custom_event_callback(app->view_dispatcher, tonies_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(
         app->view_dispatcher, tonies_navigation_callback);
-    view_dispatcher_attach_to_gui(
-        app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     app->submenu = submenu_alloc();
     submenu_set_header(app->submenu, "Tonies Capture");
-    submenu_add_item(
-        app->submenu, "Scan Tonies", ToniesMenuScan, tonies_submenu_callback, app);
-    submenu_add_item(
-        app->submenu, "Check SD Card", ToniesMenuAudit, tonies_submenu_callback, app);
-    view_dispatcher_add_view(
-        app->view_dispatcher, ToniesViewMenu, submenu_get_view(app->submenu));
+    submenu_add_item(app->submenu, "Scan Tonies", ToniesMenuScan, tonies_submenu_callback, app);
+    submenu_add_item(app->submenu, "Check SD Card", ToniesMenuAudit, tonies_submenu_callback, app);
+    view_dispatcher_add_view(app->view_dispatcher, ToniesViewMenu, submenu_get_view(app->submenu));
 
     app->widget_capture = widget_alloc();
     view_dispatcher_add_view(

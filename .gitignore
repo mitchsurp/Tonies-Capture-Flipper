@@ -1,5 +1,6 @@
 .vscode/
 .sconsign.dblite
+.clang-format
 __pycache__/
 *.pyc
 dist/debug/

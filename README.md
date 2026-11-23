@@ -1,4 +1,4 @@
-# Tonies Capture — Flipper Zero Application
+# TommyBox Capture (Tonies Capture) — Flipper Zero Application
 
 A native Flipper Zero application (`NFC` category) purpose-built for rapidly scanning, unlocking, verifying, and saving **Tonies (`NXP ICODE SLIX-L`)** NFC figures without ever saving a truncated or corrupted `.nfc` file.
 
@@ -126,12 +126,12 @@ Lock PPL: false
 
 ### Option 1: Pre-Built `.fap` Binary
 
-1. Download [`dist/tonies_capture.fap`](dist/tonies_capture.fap) (built for Flipper Zero Official Firmware API `87.1` / Target `f7`).
-2. Copy `tonies_capture.fap` to your Flipper Zero SD card at:
+1. Download [`dist/tommybox_capture.fap`](dist/tommybox_capture.fap) (built for Flipper Zero Official Firmware API `87.1` / Target `f7`).
+2. Copy `tommybox_capture.fap` to your Flipper Zero SD card at:
    ```text
-   /ext/apps/NFC/tonies_capture.fap
+   /ext/apps/NFC/tommybox_capture.fap
    ```
-3. Launch on your Flipper Zero via **Apps → NFC → Tonies Capture**.
+3. Launch on your Flipper Zero via **Apps → NFC → TommyBox Capture**.
 
 ### Option 2: Build from Source with `uFBT`
 
@@ -149,7 +149,7 @@ ufbt
 ufbt launch
 ```
 
-The compiled binary will be output to `dist/tonies_capture.fap`.
+The compiled binary will be output to `dist/tommybox_capture.fap`.
 
 ---
 
@@ -157,10 +157,16 @@ The compiled binary will be output to `dist/tonies_capture.fap`.
 
 ```text
 .
-├── application.fam          # Flipper Application Manifest (appid: tonies_capture)
+├── application.fam          # Flipper Application Manifest (appid: tommybox_capture)
 ├── tonies_capture.c         # Application source (SLIX-L poller, 8/8 verifier, UI & SD auditor)
+├── tonies_capture.png       # 10x10 1-bit monochrome Flipper app icon
+├── docs/
+│   ├── description.md       # Flipper Apps Catalog description
+│   └── changelog.md         # Release changelog
+├── screenshots/             # qFlipper screenshots for Flipper Apps Catalog
 ├── dist/
-│   └── tonies_capture.fap   # Pre-built Flipper Zero application binary (Target 7, API 87.1)
+│   └── tommybox_capture.fap # Pre-built Flipper Zero application binary (Target 7, API 87.1)
+├── LICENSE                  # MIT License
 └── README.md                # Project documentation
 ```
 
