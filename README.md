@@ -4,6 +4,16 @@ A native Flipper Zero application (`NFC` category) purpose-built for rapidly sca
 
 ---
 
+## Screenshots
+
+| Main Menu | Verified Capture (`SAVED! 8 / 8`) |
+| :---: | :---: |
+| ![Main Menu](screenshots/02_menu.png) | ![Saved 8/8](screenshots/01_saved.png) |
+| **SD Card Audit (`Check SD Card`)** | **Incomplete File Settings (`Settings`)** |
+| ![Check SD Card](screenshots/03_audit.png) | ![Settings](screenshots/04_settings.png) |
+
+---
+
 ## Why This App Exists
 
 TommyBox NFC figures use **NXP ICODE SLIX-L** (`ISO15693-3`) tags locked in **Privacy Mode** with the standard TommyBox privacy password (`7F FD 6E 5B`).
@@ -29,10 +39,10 @@ When scanning a figure using the built-in Flipper Zero NFC app (**Extra Actions 
 - **UID Deduplication & Safe Incomplete File Handling (`Settings`)**:
   - Before saving, the app checks `/ext/nfc/*.nfc` by 8-byte `UID`.
   - If a **valid** `.nfc` file with that UID already exists on the SD card, it will **not** create a duplicate file.
-  - If an **incomplete/broken** `.nfc` file with that UID exists, behavior is controlled via **Settings → Broken .nfc** (persisted in `/ext/apps_data/tommybox_capture/settings.cfg`):
-    - **`Keep` (default)**: Leaves existing files in `/ext/nfc` completely untouched and saves the verified capture to a unique non-colliding filename.
-    - **`Rename`**: Appends `_incomplete` to the older broken file only after the new verified 8/8 capture is saved and verified on disk.
-    - **`Delete`**: Removes the older broken file only after the new verified 8/8 capture is saved and verified on disk.
+  - If an **incomplete/broken** `.nfc` file with that UID exists, nothing is deleted or modified by default. Behavior is controlled via **Settings → Broken .nfc** (persisted in `/ext/apps_data/tommybox_capture/settings.cfg`):
+    - **`Keep` (default)**: Leaves existing files in `/ext/nfc` completely untouched and saves the new verified capture to a unique non-colliding filename.
+    - **`Rename` (opt-in)**: Appends `_incomplete` to the older broken file only after the new verified `8/8` capture is saved and verified on disk.
+    - **`Delete` (opt-in — disabled by default)**: Removes the older broken file only when explicitly enabled in Settings, and only after the new verified `8/8` capture is saved and verified on disk.
 - **Repeat Scan Counter (`Scan #1`, `Scan #2`, …)**: Scanning the same figure again performs a full live RF unlock and `8/8` block check, increments the on-screen scan counter, and plays a confirmation chirp without writing duplicate files.
 - **One-Button On-Device Rename**: Press **Right (`Rename`)** right after a scan to rename the file on the spot, or leave it auto-named (`TommyBox_<last4bytes>.nfc`) and keep scanning.
 - **Built-In SD Card Auditor (`Check SD Card`)**: Scans every `.nfc` file in `/ext/nfc/` and reports how many valid vs. incomplete/other files exist on your SD card, listing the exact filename and failure reason (`Incomplete (4/8 blocks)`, `Bad Pwd (...)`, etc.) for any broken captures.
@@ -79,7 +89,18 @@ When you launch **TommyBox Capture** (**Apps → NFC → TommyBox Capture**), yo
 Select **Check SD Card** from the main menu to inspect `/ext/nfc`:
 - Every `.nfc` file is checked against the strict TommyBox SLIX-L completeness rules.
 - If all files are healthy, it reports `All SLIX-L files in /ext/nfc are complete!`.
-- If any incomplete captures are found, each file and its specific defect (e.g., `[BAD] SLIX-L_22A9427F.nfc -> Incomplete (4/8 blocks)`) are listed. Scan the affected physical figure in **Scan TommyBox** mode to capture a verified `8/8` file.
+- If any incomplete captures are found, each file and its specific defect (e.g., `[BAD] SLIX-L_22A9427F.nfc -> Incomplete (4/8 blocks)`) are listed. Scan the affected physical figure in **Scan TommyBox** mode to capture a verified `8/8` file; the older incomplete file is handled according to your **Settings → Broken .nfc** preference (`Keep` by default).
+
+---
+
+### Settings (`Broken .nfc`)
+
+Select **Settings** from the main menu to configure what happens when a newly verified `8/8` capture matches the UID of an older incomplete `.nfc` file in `/ext/nfc`:
+- **`Keep` (default)**: Does not modify, rename, or delete any existing file in `/ext/nfc`.
+- **`Rename`**: Renames the older incomplete file by appending `_incomplete` (e.g., `SLIX-L_22A9427F_incomplete.nfc`) after the new verified capture is saved.
+- **`Delete`**: Deletes the older incomplete file only after the new verified capture is saved and verified on disk.
+
+Settings are saved to `/ext/apps_data/tommybox_capture/settings.cfg`.
 
 ---
 
